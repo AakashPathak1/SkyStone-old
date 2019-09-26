@@ -8,6 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+
 import java.util.Locale;
 
 @Autonomous(name = "GyroTest")
@@ -19,7 +20,11 @@ public class GyroTest extends MyOpMode {
         composeTelemetry();
         telemetry.update();
         waitForStart();
-        encoderDrive(0.5, 10, 10);
+
+        encoderDrive(1, 80, 15);
+        sleep(500);
+        gyroTurn(90);
+        sideDrive(0.3, 80, 10);
     }
 
     private void gyroTest() {

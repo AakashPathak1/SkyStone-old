@@ -76,7 +76,7 @@ abstract class MyOpMode extends LinearOpMode {
 
     private double adjust = 4;
 
-    protected void gyroTurn(double targetAngle) {
+    protected void gyroTurn(double targetAngle) { //positive angle turns to the left
         double error = 2;
         double currentSpeed;
         double headingAngle = normalizeAngle();
@@ -139,6 +139,50 @@ abstract class MyOpMode extends LinearOpMode {
         leftRear.setTargetPosition(target);
         rightFront.setTargetPosition(target);
         rightRear.setTargetPosition(target);
+
+        runtime.reset();
+
+        leftRear.setPower(speed);
+        leftFront.setPower(speed);
+        rightRear.setPower(speed);
+        rightFront.setPower(speed);
+
+        while ((opModeIsActive() && (runtime.seconds() < timeout)) && leftRear.isBusy()) {
+            telemetry.addData("Left Rear Current Position", leftRear.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop all motion;
+        brake();
+        sleep(1000);
+
+
+        // Turn off RUN_TO_POSITION
+        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    protected void sideDrive(double speed, double inches, double timeout) { //positive inches to go left
+        int target;
+
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        target = leftRear.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftFront.setTargetPosition(-target); //negative because we want side drive
+        leftRear.setTargetPosition(target);
+        rightFront.setTargetPosition(target);
+        rightRear.setTargetPosition(-target);  //negative because we want side drive
 
         runtime.reset();
 
