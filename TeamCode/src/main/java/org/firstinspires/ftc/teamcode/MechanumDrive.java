@@ -4,6 +4,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import java.text.DecimalFormat;
+
 
 @TeleOp(name = "MechanumDrive")
 public class MechanumDrive extends MyOpMode {
@@ -17,6 +19,7 @@ public class MechanumDrive extends MyOpMode {
         // Send telemetry message to signify robot waiting;
         boolean accelerating = false;
         composeTelemetry();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -66,7 +69,7 @@ public class MechanumDrive extends MyOpMode {
 
             if (acceleratePower > 0 && !gamepad1.x) {
                 acceleratePower -= 0.001;
-                if (acceleratePower < 0) {
+                if (acceleratePower <= 0) {
                     acceleratePower = 0;
                     accelerating = false;
                 }
@@ -78,11 +81,15 @@ public class MechanumDrive extends MyOpMode {
 
             slowMode = gamepad1.a || slowMode; // enable slow mode
             slowMode = !gamepad1.b && slowMode; // disable slow mode "1_1/2"
+
+            telemetry.update();
         }
     }
 
     private void composeTelemetry() {
         telemetry.addLine().addData("Slow Mode: ", () -> slowMode ? "true" : "false");
+        DecimalFormat df = new DecimalFormat("#.00000");
+        df.format(0.912385);
         telemetry.addLine().addData("Acceleration/Deceleration Power: ", () -> Double.toString(acceleratePower));
         telemetry.addData("Say", "Hello Driver");
         telemetry.update();
