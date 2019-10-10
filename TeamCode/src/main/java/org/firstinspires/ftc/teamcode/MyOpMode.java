@@ -21,7 +21,6 @@ abstract class MyOpMode extends LinearOpMode {
     DcMotor rightRear;
     DcMotor leftFront;
     DcMotor rightFront;
-    DcMotor lifter;
     BNO055IMU imu;
 
     private static final double COUNTS_PER_MOTOR_REV = 537.6;    // Neverest 20: 537.6,    Torquenado: 1440,
@@ -45,8 +44,6 @@ abstract class MyOpMode extends LinearOpMode {
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
-        lifter = hardwareMap.get(DcMotor.class, "lifter");
-
         leftRear.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         rightRear.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         leftFront.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
@@ -206,45 +203,6 @@ abstract class MyOpMode extends LinearOpMode {
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-
-    /**
-     * It is run to position for a single motor called lifter
-     */
-    protected  void armEncoder(double speed, double inches, double timeout) { //
-        int target;
-
-        lifter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-        target = lifter.getCurrentPosition() - (int) (inches * COUNTS_PER_INCH);
-
-
-        lifter.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        lifter.setTargetPosition(target);
-
-
-        runtime.reset();
-
-        lifter.setPower(speed);
-
-
-        while ((opModeIsActive() && (runtime.seconds() < timeout)) && !inRange(lifter.getCurrentPosition(), target, 100)) {
-
-            // Display it for the driver.
-            telemetry.addData("Current Position", lifter.getCurrentPosition());
-            telemetry.update();
-        }
-
-        // Stop all motion;
-        lifter.setPower(0);
-        sleep(1000);
-
-
-        // Turn off RUN_TO_POSITION
-        lifter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
     }
 
     private static boolean inRange(int lower , int higher, int val) {
