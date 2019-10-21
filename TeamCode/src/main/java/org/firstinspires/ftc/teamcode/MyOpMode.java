@@ -13,14 +13,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 @SuppressWarnings("WeakerAccess")
 abstract class MyOpMode extends LinearOpMode {
 
-    private ElapsedTime runtime = new ElapsedTime();
+    ElapsedTime runtime = new ElapsedTime();
 
     Orientation angles;
 
-    DcMotor leftRear;
-    DcMotor rightRear;
-    DcMotor leftFront;
-    DcMotor rightFront;
+    DcMotor leftRear, rightRear, leftFront, rightFront;
     BNO055IMU imu;
 
     private static final double COUNTS_PER_MOTOR_REV = 537.6;    // Neverest 20: 537.6,    Torquenado: 1440,
@@ -205,7 +202,7 @@ abstract class MyOpMode extends LinearOpMode {
         rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private static boolean inRange(int lower , int higher, int val) {
+    private static boolean inRange(int lower, int higher, int val) {
         return val > lower && val < higher;
     }
 
