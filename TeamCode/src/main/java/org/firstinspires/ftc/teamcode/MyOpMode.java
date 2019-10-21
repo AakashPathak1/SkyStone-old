@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -19,6 +20,7 @@ abstract class MyOpMode extends LinearOpMode {
 
     DcMotor leftRear, rightRear, leftFront, rightFront;
     BNO055IMU imu;
+    ColorSensor colorSensor;
 
     private static final double COUNTS_PER_MOTOR_REV = 537.6;    // Neverest 20: 537.6,    Torquenado: 1440,
     private static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
@@ -35,6 +37,8 @@ abstract class MyOpMode extends LinearOpMode {
         parameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
 
         // Define and Initialize Motors
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
