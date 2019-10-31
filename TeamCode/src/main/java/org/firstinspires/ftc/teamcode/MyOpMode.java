@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.motors.NeveRest20Gearmotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,9 +23,15 @@ abstract class MyOpMode extends LinearOpMode {
     Servo foundationGrabber, clamp, spin;
     BNO055IMU imu;
     ColorSensor colorSensor;
+    ColorSensor colorSensor2;
 
+    @SuppressWarnings("unused")
     private static final double NEVEREST_COUNTS_PER_MOTOR_REV = 537.6;
+    @SuppressWarnings("unused")
     private static final double GOBILDA_COUNTS_PER_MOTOR_REV = 36.4 * 5.2;
+
+    @SuppressWarnings("unused")
+    private static final double ACTUATOR_GEAR_REDUCTION = 3/12.7;
 
     private static final double COUNTS_PER_MOTOR_REV = GOBILDA_COUNTS_PER_MOTOR_REV;    // Neverest 20: 537.6,    Torquenado: 1440,
     private static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
@@ -34,6 +39,7 @@ abstract class MyOpMode extends LinearOpMode {
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     protected void initialize() {
+        colorSensor2 =  hardwareMap.get(ColorSensor.class, "colorSensor2");
         // The IMU sensor object
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -79,9 +85,9 @@ abstract class MyOpMode extends LinearOpMode {
         foundationGrabber = hardwareMap.get(Servo.class, "foundationGrabber");
         foundationGrabber.setPosition(0.0);
         clamp = hardwareMap.get(Servo.class, "clamp");
-        clamp.setPosition(0.0);
+        clamp.setPosition(1.0);
         spin = hardwareMap.get(Servo.class, "spin");
-        spin.setPosition(0.0);
+        spin.setPosition(0.3);
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }
@@ -129,7 +135,7 @@ abstract class MyOpMode extends LinearOpMode {
         }
         brake();
         sleep(200);
-        headingAngle = normalizeAngle();
+        normalizeAngle();
     }
 
     protected void encoderDrive(double speed, double inches, double timeout) {
@@ -218,6 +224,30 @@ abstract class MyOpMode extends LinearOpMode {
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    protected void actuatorMove(double speed, double inches, double timeout) {
+        actuatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int target = actuatorMotor.getCurrentPosition() - (int) (inches * (COUNTS_PER_MOTOR_REV * ACTUATOR_GEAR_REDUCTION));
+
+        actuatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        actuatorMotor.setTargetPosition(target);
+
+        runtime.reset();
+
+        actuatorMotor.setPower(speed);
+
+        while ((opModeIsActive() && (runtime.seconds() < timeout)) && actuatorMotor.isBusy()) {
+            telemetry.addData("Actuator Position", leftRear.getCurrentPosition());
+            telemetry.update();
+        }
+
+        brake();
+        sleep(500);
+
+//        actuatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private static boolean inRange(int lower, int higher, int val) {

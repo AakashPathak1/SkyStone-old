@@ -92,7 +92,7 @@ public class MechanumDrive extends MyOpMode {
             }
             if (gamepad2.b && !lastBState2) {
                 // if foundationGrabber != 0.0, set it to 1.0, else set it to 0.0
-                spin.setPosition(spin.getPosition() != 0.0 ? 0.0 : 0.8);
+                spin.setPosition(spin.getPosition() != 0.3 ? 0.3 : 0.65);
             }
             lastBState = gamepad1.b;
             lastBState2 = gamepad2.b;
