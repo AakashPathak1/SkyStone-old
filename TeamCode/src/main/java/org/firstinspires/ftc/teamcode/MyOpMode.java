@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.motors.NeveRest20Gearmotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -18,12 +20,16 @@ abstract class MyOpMode extends LinearOpMode {
 
     Orientation angles;
 
-    DcMotor leftRear, rightRear, leftFront, rightFront;
+    DcMotor leftRear, rightRear, leftFront, rightFront, actuatorMotor, lifterLeft, lifterRight;
+    Servo foundationGrabber, clamp, spin;
     BNO055IMU imu;
     ColorSensor colorSensor;
 
-    private static final double COUNTS_PER_MOTOR_REV = 537.6;    // Neverest 20: 537.6,    Torquenado: 1440,
-    private static final double DRIVE_GEAR_REDUCTION = 1;     // This is < 1.0 if geared UP
+    private static final double NEVEREST_COUNTS_PER_MOTOR_REV = 537.6;
+    private static final double GOBILDA_COUNTS_PER_MOTOR_REV = 36.4 * 5.2;
+
+    private static final double COUNTS_PER_MOTOR_REV = GOBILDA_COUNTS_PER_MOTOR_REV;    // Neverest 20: 537.6,    Torquenado: 1440,
+    private static final double DRIVE_GEAR_REDUCTION = 1.0;     // This is < 1.0 if geared UP
     private static final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference       3.93701 = mechanum wheels
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
@@ -45,29 +51,37 @@ abstract class MyOpMode extends LinearOpMode {
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        actuatorMotor = hardwareMap.get(DcMotor.class, "actuatorMotor");
+        lifterLeft = hardwareMap.get(DcMotor.class, "lifterLeft");
+        lifterRight = hardwareMap.get(DcMotor.class, "lifterRight");
         leftRear.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         rightRear.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         leftFront.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         rightFront.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+        lifterLeft.setDirection(DcMotor.Direction.REVERSE);
 
         //Set to brake mode
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        actuatorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lifterLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lifterRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set all motors to zero power
         leftRear.setPower(0);
         rightRear.setPower(0);
         leftFront.setPower(0);
         rightFront.setPower(0);
+        actuatorMotor.setPower(0);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        foundationGrabber = hardwareMap.get(Servo.class, "foundationGrabber");
+        foundationGrabber.setPosition(0.0);
+        clamp = hardwareMap.get(Servo.class, "clamp");
+        clamp.setPosition(0.0);
+        spin = hardwareMap.get(Servo.class, "spin");
+        spin.setPosition(0.0);
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
     }

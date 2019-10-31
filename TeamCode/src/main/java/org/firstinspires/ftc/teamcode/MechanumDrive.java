@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-
-import java.text.DecimalFormat;
-
 
 @TeleOp(name = "MechanumDrive")
 public class MechanumDrive extends MyOpMode {
@@ -22,22 +17,22 @@ public class MechanumDrive extends MyOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-
+        boolean lastBState = false;
+        boolean lastAState = false;
+        boolean lastBState2 = false;
+        boolean lastAState2 = false;
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
             double r = Math.hypot(gamepad1.left_stick_y, gamepad1.left_stick_x);
             double robotAngle = Math.atan2(gamepad1.left_stick_y, -gamepad1.left_stick_x) - Math.PI / 4;
             double rightX = -gamepad1.right_stick_x;
-            final double v1 = r * Math.cos(robotAngle) + rightX;
-            final double v2 = r * Math.sin(robotAngle) - rightX;
-            final double v3 = r * Math.sin(robotAngle) + rightX;
-            final double v4 = r * Math.cos(robotAngle) - rightX;
+            double rightY2 = gamepad2.right_stick_y;
+            final double v1 = (r * Math.cos(robotAngle) + rightX) * Math.sqrt(2);
+            final double v2 = (r * Math.sin(robotAngle) - rightX) * Math.sqrt(2);
+            final double v3 = (r * Math.sin(robotAngle) + rightX) * Math.sqrt(2);
+            final double v4 = (r * Math.cos(robotAngle) - rightX) * Math.sqrt(2);
 
-            leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             if (gamepad1.y) {
                 accelerating = false;
@@ -79,19 +74,46 @@ public class MechanumDrive extends MyOpMode {
                 leftFront.setPower(-acceleratePower);
             }
 
-            slowMode = gamepad1.a || slowMode; // enable slow mode
-            slowMode = !gamepad1.b && slowMode; // disable slow mode "1_1/2"
+            if (gamepad1.a && !lastAState) {
+                slowMode = !slowMode;
+            }
+            if (gamepad2.a && !lastAState2) {
+                clamp.setPosition(clamp.getPosition() != 0.0 ? 0.0 : 1.0);
+
+            }
+            lastAState = gamepad1.a;
+            lastAState2 = gamepad2.a;
+
+
+
+            if (gamepad1.b && !lastBState) {
+                // if foundationGrabber != 0.0, set it to 1.0, else set it to 0.0
+                foundationGrabber.setPosition(foundationGrabber.getPosition() != 0.0 ? 0.0 : 1.0);
+            }
+            if (gamepad2.b && !lastBState2) {
+                // if foundationGrabber != 0.0, set it to 1.0, else set it to 0.0
+                spin.setPosition(spin.getPosition() != 0.0 ? 0.0 : 0.8);
+            }
+            lastBState = gamepad1.b;
+            lastBState2 = gamepad2.b;
+
+            actuatorMotor.setPower(gamepad2.left_stick_y);
+            telemetry.addData("actuator motor", gamepad2.left_stick_y);
+            lifterLeft.setPower(rightY2);
+            lifterRight.setPower(rightY2);
+            telemetry.addData("lifter", rightY2);
 
             telemetry.update();
         }
     }
 
     private void composeTelemetry() {
-        telemetry.addLine().addData("Slow Mode: ", () -> slowMode ? "true" : "false");
-        DecimalFormat df = new DecimalFormat("#.00000");
-        df.format(0.912385);
+        telemetry.addLine().addData("Slow Mode: ", () -> slowMode);
+        telemetry.addLine().addData("Foundation Grabber Position: ", () -> foundationGrabber.getPosition());
         telemetry.addLine().addData("Acceleration/Deceleration Power: ", () -> Double.toString(acceleratePower));
-        telemetry.addData("Say", "Hello Driver");
+        telemetry.addLine().addData("Clamp Servo: ", () -> Double.toString(clamp.getPosition()));
+        telemetry.addLine().addData("Spin Servo: ", () -> Double.toString(spin.getPosition()));
+
         telemetry.update();
     }
 
