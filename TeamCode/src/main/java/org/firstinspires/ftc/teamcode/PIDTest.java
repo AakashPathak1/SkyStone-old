@@ -44,19 +44,8 @@ public class PIDTest extends MyOpMode {
         // straight line. P value controls how sensitive the correction is.
         PIDController pidDrive = new PIDController(.03, 0, 0);
 
-        telemetry.addData("Mode", "calibrating...");
-        telemetry.update();
-        // make sure the imu gyro is calibrated before continuing.
-        while (!isStopRequested() && !imu.isGyroCalibrated()) {
-            sleep(50);
-            idle();
-        }
-
         telemetry.addData("Mode", "waiting for start");
-        telemetry.addData("imu calib status", imu.getCalibrationStatus().toString());
         telemetry.update();
-
-        // wait for start button.
 
         waitForStart();
 
@@ -99,6 +88,7 @@ public class PIDTest extends MyOpMode {
         leftFront.setPower(0);
         rightRear.setPower(0);
         rightFront.setPower(0);
+        rightFront.getCurrentPosition();
     }
 
     @SuppressWarnings("unused")

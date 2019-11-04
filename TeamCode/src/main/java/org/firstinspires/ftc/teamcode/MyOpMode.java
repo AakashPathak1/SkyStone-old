@@ -39,7 +39,6 @@ abstract class MyOpMode extends LinearOpMode {
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
     protected void initialize() {
-        colorSensor2 =  hardwareMap.get(ColorSensor.class, "colorSensor2");
         // The IMU sensor object
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -49,7 +48,16 @@ abstract class MyOpMode extends LinearOpMode {
         parameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+        telemetry.addData("Mode", "Calibrating imu...");
+        telemetry.update();
+        while (!isStopRequested() && !imu.isGyroCalibrated()) {
+            sleep(50);
+            idle();
+        }
+        telemetry.addData("Mode", "Initializing hardware devices");
+        telemetry.update();
 
+        colorSensor2 =  hardwareMap.get(ColorSensor.class, "colorSensor2");
         colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
 
         // Define and Initialize Motors
@@ -75,6 +83,9 @@ abstract class MyOpMode extends LinearOpMode {
         lifterLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lifterRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        telemetry.addData("Mode", "Setting motors power");
+        telemetry.update();
+
         // Set all motors to zero power
         leftRear.setPower(0);
         rightRear.setPower(0);
@@ -90,6 +101,9 @@ abstract class MyOpMode extends LinearOpMode {
         spin.setPosition(0.3);
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        telemetry.addData("Mode", "Done initializing");
+        telemetry.update();
     }
 
     private double adjust = 4;
