@@ -15,6 +15,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 @SuppressWarnings("WeakerAccess")
 abstract class MyOpMode extends LinearOpMode {
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private final boolean calibrateIMU = false;
+
     ElapsedTime runtime = new ElapsedTime();
 
     Orientation angles;
@@ -50,7 +53,7 @@ abstract class MyOpMode extends LinearOpMode {
         imu.initialize(parameters);
         telemetry.addData("Mode", "Calibrating imu...");
         telemetry.update();
-        while (!isStopRequested() && !imu.isGyroCalibrated()) {
+        while (calibrateIMU && !isStopRequested() && !imu.isGyroCalibrated()) {
             sleep(50);
             idle();
         }
@@ -73,6 +76,8 @@ abstract class MyOpMode extends LinearOpMode {
         leftFront.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         rightFront.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         lifterLeft.setDirection(DcMotor.Direction.REVERSE);
+        lifterRight.setDirection(DcMotor.Direction.FORWARD);
+
 
         //Set to brake mode
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

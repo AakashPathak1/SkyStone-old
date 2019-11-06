@@ -27,7 +27,7 @@ public class MechanumDrive extends MyOpMode {
             double r = Math.hypot(gamepad1.left_stick_y, gamepad1.left_stick_x);
             double robotAngle = Math.atan2(gamepad1.left_stick_y, -gamepad1.left_stick_x) - Math.PI / 4;
             double rightX = -gamepad1.right_stick_x;
-            double rightY2 = gamepad2.right_stick_y;
+            double lifterPower = -gamepad2.right_stick_y;
             final double v1 = (r * Math.cos(robotAngle) + rightX) * Math.sqrt(2);
             final double v2 = (r * Math.sin(robotAngle) - rightX) * Math.sqrt(2);
             final double v3 = (r * Math.sin(robotAngle) + rightX) * Math.sqrt(2);
@@ -92,17 +92,18 @@ public class MechanumDrive extends MyOpMode {
             }
             if (gamepad2.b && !lastBState2) {
                 // if foundationGrabber != 0.0, set it to 1.0, else set it to 0.0
-                spin.setPosition(spin.getPosition() != 0.3 ? 0.3 : 0.65);
+                spin.setPosition(spin.getPosition() != 0.3 ? 0.3 : 0.6);
             }
             lastBState = gamepad1.b;
             lastBState2 = gamepad2.b;
 
             actuatorMotor.setPower(gamepad2.left_stick_y);
             telemetry.addData("actuator motor", gamepad2.left_stick_y);
-            lifterLeft.setPower(rightY2);
-            lifterRight.setPower(rightY2);
-            telemetry.addData("lifter", rightY2);
 
+            lifterRight.setPower(lifterPower);
+            lifterLeft.setPower(lifterPower);
+
+            telemetry.addData("lifter", lifterPower);
             telemetry.update();
         }
     }
@@ -113,9 +114,12 @@ public class MechanumDrive extends MyOpMode {
         telemetry.addLine().addData("Acceleration/Deceleration Power: ", () -> Double.toString(acceleratePower));
         telemetry.addLine().addData("Clamp Servo: ", () -> Double.toString(clamp.getPosition()));
         telemetry.addLine().addData("Spin Servo: ", () -> Double.toString(spin.getPosition()));
+        telemetry.addLine().addData("ActuatorMotor Encoder Value: ", () -> actuatorMotor.getCurrentPosition());
+        telemetry.addLine().addData("DrawerSlides Encoder Value: ", () -> lifterLeft.getCurrentPosition());
 
         telemetry.update();
     }
+
 
 
 }
