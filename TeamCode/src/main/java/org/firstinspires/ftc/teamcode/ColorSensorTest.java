@@ -3,23 +3,18 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-import java.util.Locale;
 
 
 @TeleOp(name = "Color Sensor Test", group = "Sensor")
 public class ColorSensorTest extends LinearOpMode {
 
     private ColorSensor colorSensor;
-    private DistanceSensor distanceSensor;
+    private ColorSensor colorSensor2;
 
     @Override
     public void runOpMode() {
-        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
-        distanceSensor = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
+        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance1");
+        colorSensor2 = hardwareMap.get(ColorSensor.class, "sensor_color_distance2");
 
         waitForStart();
         composeTelemetry();
@@ -27,16 +22,24 @@ public class ColorSensorTest extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry.update();
         }
-
     }
 
     private void composeTelemetry() {
-        telemetry.addLine().addData("Distance (cm)", () -> String.format(Locale.US, "%.02f", distanceSensor.getDistance(DistanceUnit.CM)));
-        telemetry.addLine().addData("Alpha ", () -> colorSensor.alpha());
-        telemetry.addLine().addData("Red ", () -> colorSensor.red());
-        telemetry.addLine().addData("Green ", () -> colorSensor.green());
-        telemetry.addLine().addData("Blue ", () -> colorSensor.blue());
-        telemetry.addLine().addData("Shaunak value ", () -> 1.0 * (colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()));
+        telemetry.addLine().addData("Alpha1 ", () -> colorSensor.alpha());
+        telemetry.addLine().addData("Red1 ", () -> colorSensor.red());
+        telemetry.addLine().addData("Green1 ", () -> colorSensor.green());
+        telemetry.addLine().addData("Blue1 ", () -> colorSensor.blue());
+        telemetry.addLine().addData("Shaunak value1 ", () -> 1.0 * (colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()));
+
+        telemetry.addLine().addData("Alpha2 ", () -> colorSensor2.alpha());
+        telemetry.addLine().addData("Red2 ", () -> colorSensor2.red());
+        telemetry.addLine().addData("Green2 ", () -> colorSensor2.green());
+        telemetry.addLine().addData("Blue2 ", () -> colorSensor2.blue());
+        telemetry.addLine().addData("Shaunak value2 ", () -> 1.0 * (colorSensor2.red() + colorSensor2.green()) / (colorSensor2.red() + colorSensor2.green() + colorSensor2.blue()));
+
+        telemetry.addLine();
+
+        telemetry.addLine().addData("Difference ", () -> 1.0 * (Math.abs((colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()) - (colorSensor2.red() + colorSensor2.green()) / (colorSensor2.red() + colorSensor2.green() + colorSensor2.blue()))));
 
         telemetry.update();
     }

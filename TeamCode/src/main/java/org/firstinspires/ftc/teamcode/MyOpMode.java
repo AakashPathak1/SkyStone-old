@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,8 +26,9 @@ abstract class MyOpMode extends LinearOpMode {
     DcMotor leftRear, rightRear, leftFront, rightFront, actuatorMotor, lifterLeft, lifterRight;
     Servo foundationGrabber, clamp, spin;
     BNO055IMU imu;
-    ColorSensor colorSensor;
-    ColorSensor colorSensor2;
+    ColorSensor colorSensor1, colorSensor2;
+
+    DigitalChannel downStop;  // Hardware Device Object
 
     @SuppressWarnings("unused")
     private static final double NEVEREST_COUNTS_PER_MOTOR_REV = 537.6;
@@ -60,8 +62,10 @@ abstract class MyOpMode extends LinearOpMode {
         telemetry.addData("Mode", "Initializing hardware devices");
         telemetry.update();
 
-        colorSensor2 =  hardwareMap.get(ColorSensor.class, "colorSensor2");
-        colorSensor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
+        colorSensor1 = hardwareMap.get(ColorSensor.class, "sensor_color_distance1");
+        colorSensor2 =  hardwareMap.get(ColorSensor.class, "sensor_color_distance2");
+        downStop = hardwareMap.get(DigitalChannel.class, "downStop");
+
 
         // Define and Initialize Motors
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -77,6 +81,9 @@ abstract class MyOpMode extends LinearOpMode {
         rightFront.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         lifterLeft.setDirection(DcMotor.Direction.REVERSE);
         lifterRight.setDirection(DcMotor.Direction.FORWARD);
+
+        downStop.setMode(DigitalChannel.Mode.INPUT);
+
 
 
         //Set to brake mode

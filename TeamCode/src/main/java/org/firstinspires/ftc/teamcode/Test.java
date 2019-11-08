@@ -33,7 +33,7 @@ public class Test extends MyOpMode {
         rightRear.setPower(-0.2);
         boolean foundSkystone;
         do {
-            foundSkystone = 1.0 * (colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()) < 0.73;
+            foundSkystone = 1.0 * (colorSensor1.red() + colorSensor1.green()) / (colorSensor1.red() + colorSensor1.green() + colorSensor1.blue()) < 0.73;
         } while (!foundSkystone && opModeIsActive());
         brake();
     }
@@ -41,11 +41,11 @@ public class Test extends MyOpMode {
     private void colorTelemetry() {
         telemetry.addLine()
                 .addData("heading", () -> formatAngle(angles.angleUnit, angles.firstAngle));
-        telemetry.addLine().addData("Alpha ", () -> colorSensor.alpha());
-        telemetry.addLine().addData("Red  ", () -> colorSensor.red());
-        telemetry.addLine().addData("Green ", () -> colorSensor.green());
-        telemetry.addLine().addData("Blue ", () -> colorSensor.blue());
-        telemetry.addLine().addData("Shaunak value ", () -> 1.0 * (colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()));
+        telemetry.addLine().addData("Alpha ", () -> colorSensor1.alpha());
+        telemetry.addLine().addData("Red  ", () -> colorSensor1.red());
+        telemetry.addLine().addData("Green ", () -> colorSensor1.green());
+        telemetry.addLine().addData("Blue ", () -> colorSensor1.blue());
+        telemetry.addLine().addData("Shaunak value ", () -> 1.0 * (colorSensor1.red() + colorSensor1.green()) / (colorSensor1.red() + colorSensor1.green() + colorSensor1.blue()));
 
         telemetry.update();
     }
