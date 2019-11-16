@@ -29,6 +29,8 @@ abstract class MyOpMode extends LinearOpMode {
     ColorSensor colorSensor1, colorSensor2;
 
     DigitalChannel downStop;  // Hardware Device Object
+    DigitalChannel upStop;  // Hardware Device Object
+
 
     @SuppressWarnings("unused")
     private static final double NEVEREST_COUNTS_PER_MOTOR_REV = 537.6;
@@ -65,6 +67,8 @@ abstract class MyOpMode extends LinearOpMode {
         colorSensor1 = hardwareMap.get(ColorSensor.class, "sensor_color_distance1");
         colorSensor2 =  hardwareMap.get(ColorSensor.class, "sensor_color_distance2");
         downStop = hardwareMap.get(DigitalChannel.class, "downStop");
+        upStop = hardwareMap.get(DigitalChannel.class, "upStop");
+
 
 
         // Define and Initialize Motors
@@ -83,6 +87,8 @@ abstract class MyOpMode extends LinearOpMode {
         lifterRight.setDirection(DcMotor.Direction.FORWARD);
 
         downStop.setMode(DigitalChannel.Mode.INPUT);
+        upStop.setMode(DigitalChannel.Mode.INPUT);
+
 
 
 
@@ -110,7 +116,7 @@ abstract class MyOpMode extends LinearOpMode {
         clamp = hardwareMap.get(Servo.class, "clamp");
         clamp.setPosition(1.0);
         spin = hardwareMap.get(Servo.class, "spin");
-        spin.setPosition(0.3);
+        spin.setPosition(0.45);
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
@@ -252,14 +258,16 @@ abstract class MyOpMode extends LinearOpMode {
         rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    protected void actuatorMove(double speed, double inches, double timeout) {
+    protected void actuatorMove(double speed, int ticks, double timeout) {
         actuatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        int target = actuatorMotor.getCurrentPosition() - (int) (inches * (COUNTS_PER_MOTOR_REV * ACTUATOR_GEAR_REDUCTION));
+        int target = actuatorMotor.getCurrentPosition() - ticks;
+
+        actuatorMotor.setTargetPosition(target);
+
 
         actuatorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        actuatorMotor.setTargetPosition(target);
 
         runtime.reset();
 
@@ -270,10 +278,57 @@ abstract class MyOpMode extends LinearOpMode {
             telemetry.update();
         }
 
+        actuatorMotor.setPower(0);
         brake();
         sleep(500);
 
-//        actuatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        actuatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+    }
+
+    protected void lifterMove(double speed, int ticks, double timeout) {
+        lifterLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lifterRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        double countsPerMotorRev = 356.3;
+
+
+        int targetLeft = lifterLeft.getCurrentPosition() - ticks;
+        int targetRight = lifterRight.getCurrentPosition() - ticks;
+
+
+        lifterLeft.setTargetPosition(-targetLeft);
+        lifterRight.setTargetPosition(-targetRight);
+
+
+        lifterLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lifterRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+        runtime.reset();
+
+        lifterLeft.setPower(speed);
+        lifterRight.setPower(speed);
+
+        while ((opModeIsActive() && (runtime.seconds() < timeout)) && lifterLeft.isBusy() && lifterRight.isBusy()) {
+            telemetry.addData("Left Lifter Position", lifterLeft.getCurrentPosition());
+            telemetry.addData("Right Lifter Position", lifterRight.getCurrentPosition());
+
+            telemetry.update();
+        }
+
+        lifterLeft.setPower(0);
+        lifterRight.setPower(0);
+
+        brake();
+        sleep(500);
+
+        lifterRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lifterLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
     }
 
     private static boolean inRange(int lower, int higher, int val) {
