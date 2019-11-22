@@ -51,11 +51,11 @@ public class Test extends MyOpMode {
     }
 
     private void gyroTest() {
-        gyroTurn(-90);
+        gyroTurn(-90, 0.2);
         telemetry.addData("Angle", angles.firstAngle);
         telemetry.update();
         sleep(500);
-        gyroTurn(90);
+        gyroTurn(90, 0.2);
         sleep(300);
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("Angle", angles.firstAngle);

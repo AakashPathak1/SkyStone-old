@@ -39,7 +39,7 @@ public class ColorSensorTest extends LinearOpMode {
 
         telemetry.addLine();
 
-        telemetry.addLine().addData("Difference ", () -> 1.0 * (Math.abs((colorSensor.red() + colorSensor.green()) / (colorSensor.red() + colorSensor.green() + colorSensor.blue()) - (colorSensor2.red() + colorSensor2.green()) / (colorSensor2.red() + colorSensor2.green() + colorSensor2.blue()))));
+        telemetry.addLine().addData("Difference ", () ->  (Math.abs((1.0 * colorSensor.red() + colorSensor.green()) / ( 1.0 * colorSensor.red() + colorSensor.green() + colorSensor.blue()) - (((double) (colorSensor2.red() + colorSensor2.green()))) / (colorSensor2.red() + colorSensor2.green() + colorSensor2.blue()))));
 
         telemetry.update();
     }
