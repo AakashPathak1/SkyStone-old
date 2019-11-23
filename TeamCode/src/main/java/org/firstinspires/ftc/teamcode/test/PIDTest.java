@@ -10,7 +10,7 @@
 // Use PID controller to manage motor power during 90 degree turn to reduce
 // overshoot.
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -19,6 +19,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.MyOpMode;
+import org.firstinspires.ftc.teamcode.PIDController;
 
 @Autonomous(name = "PIDTest", group = "Exercises")
 //@Disabled
@@ -62,11 +64,9 @@ public class PIDTest extends MyOpMode {
 
         sleep(1000);
         forwardDrive(50);
-
-
     }
 
-    private void forwardDrive(double inches) {
+    protected void forwardDrive(double inches) {
         int targetPosition = (int) (inches * 45);
         int currentPosition = leftRear.getCurrentPosition();
         if (inches > 0) {
@@ -125,7 +125,7 @@ public class PIDTest extends MyOpMode {
     }
 
     @SuppressWarnings("unused")
-    private void pidSideDrive(double inches) {
+    protected void pidSideDrive(double inches) {
         int targetPosition = (int) (inches * 45);
         int currentPosition = leftRear.getCurrentPosition();
         if (inches > 0) {
@@ -178,7 +178,7 @@ public class PIDTest extends MyOpMode {
      *
      * @return Angle in degrees. + = left, - = right from zero point.
      */
-    private double getAngle() {
+    protected double getAngle() {
         // We experimentally determined the Z axis is the axis we want to use for heading angle.
         // We have to process the angle because the imu works in euler angles so the Z axis is
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes

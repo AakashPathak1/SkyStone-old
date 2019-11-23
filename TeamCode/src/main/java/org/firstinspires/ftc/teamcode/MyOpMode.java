@@ -14,26 +14,38 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 @SuppressWarnings("WeakerAccess")
-abstract class MyOpMode extends LinearOpMode {
+public abstract class MyOpMode extends LinearOpMode {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final boolean calibrateIMU = true;
+    protected ElapsedTime runtime = new ElapsedTime();
 
-    ElapsedTime runtime = new ElapsedTime();
+    protected Orientation angles;
+    protected BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
-    Orientation angles;
-    BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-    PIDController pidRotate = new PIDController(0.0075, .00003, 0);
+    // all the PID constants
+    final double rotateP = 0.0025;
+    final double rotateI = .00003;
+    final double rotateD = 0;
 
-    DcMotor leftRear, rightRear, leftFront, rightFront, actuatorMotor, lifterLeft, lifterRight;
-    Servo foundationGrabber, clamp, spin;
-    BNO055IMU imu;
-    ColorSensor colorSensor1, colorSensor2;
+    final double driveP = .019;
+    final double driveI = 0;
+    final double driveD = 0;
 
-    DigitalChannel downStop;  // Hardware Device Object
-    DigitalChannel upStop;  // Hardware Device Object
+    final double sidedriveP = .01;
+    final double sidedriveI = .0005;
+    final double sidedriveD = 0;
 
-    /** PID stuff **/
+
+    protected DcMotor leftRear, rightRear, leftFront, rightFront, actuatorMotor, lifterLeft, lifterRight;
+    protected Servo foundationGrabber, clamp, spin;
+    protected BNO055IMU imu;
+    protected ColorSensor colorSensor1, colorSensor2;
+
+    protected DigitalChannel downStop;  // Hardware Device Object
+    protected DigitalChannel upStop;  // Hardware Device Object
+
+    /**
+     * PID stuff
+     **/
 
     private Orientation lastAngles = new Orientation();
     private double globalAngle;
@@ -53,7 +65,7 @@ abstract class MyOpMode extends LinearOpMode {
     private static final double WHEEL_DIAMETER_INCHES = 3.93701;     // For figuring circumference       3.93701 = mechanum wheels
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    protected void initialize() {
+    protected void initialize(boolean calibrateIMU) {
         // The IMU sensor object
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -125,8 +137,18 @@ abstract class MyOpMode extends LinearOpMode {
 
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
+
         telemetry.addData("Mode", "Done initializing");
         telemetry.update();
+    }
+
+    protected void dropLifter() {
+        lifterLeft.setPower(-0.8);
+        lifterRight.setPower(-0.8);
+        while (downStop.getState() && opModeIsActive()) { //is not pressed
+        }
+        lifterLeft.setPower(0);
+        lifterRight.setPower(0);
     }
 
     /**
@@ -134,8 +156,14 @@ abstract class MyOpMode extends LinearOpMode {
      *
      * @param degrees Degrees to turn, + is left - is right
      */
-     void pidRotate(int degrees, double power) {
+    protected void pidRotate(int degrees, double power) { //positive turns to the left
+        //  degrees -= 2; //to fix overturn
         // restart imu angle tracking.
+        if (degrees < 0) {
+            degrees += 4;
+        } else {
+            degrees -= 4;
+        }
         resetAngle();
         rightRear.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
@@ -152,7 +180,7 @@ abstract class MyOpMode extends LinearOpMode {
         // dependant on the motor and gearing configuration, starting power, weight of the robot and the
         // on target tolerance. If the controller overshoots, it will reverse the sign of the output
         // turning the robot back toward the setpoint value.
-
+        PIDController pidRotate = new PIDController(rotateP, rotateI, rotateD);
         pidRotate.reset();
         pidRotate.setSetpoint(degrees);
         pidRotate.setInputRange(0, degrees);
@@ -212,7 +240,7 @@ abstract class MyOpMode extends LinearOpMode {
     /**
      * Resets the cumulative angle tracking to zero.
      */
-    private void resetAngle() {
+    protected void resetAngle() {
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
         globalAngle = 0;
@@ -223,7 +251,7 @@ abstract class MyOpMode extends LinearOpMode {
      *
      * @return Angle in degrees. + = left, - = right from zero point.
      */
-    private double getAngle() {
+    protected double getAngle() {
         // We experimentally determined the Z axis is the axis we want to use for heading angle.
         // We have to process the angle because the imu works in euler angles so the Z axis is
         // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
@@ -247,7 +275,7 @@ abstract class MyOpMode extends LinearOpMode {
         return globalAngle;
     }
 
-    private double adjust = 4;
+    protected double adjust = 4;
 
     protected void gyroTurn(double targetAngle, double speed) { //positive angle turns to the left
         double error = 2;
@@ -446,17 +474,14 @@ abstract class MyOpMode extends LinearOpMode {
             telemetry.update();
         }
 
-        lifterLeft.setPower(0);
-        lifterRight.setPower(0);
-
-        brake();
-        sleep(500);
+        lifterLeft.setPower(0.0);
+        lifterRight.setPower(0.0);
 
         lifterRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lifterLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    private static boolean inRange(int lower, int higher, int val) {
+    protected static boolean inRange(int lower, int higher, int val) {
         return val > lower && val < higher;
     }
 
@@ -511,15 +536,14 @@ abstract class MyOpMode extends LinearOpMode {
         sleep(50);
     }
 
-    private double normalizeAngle() {
+    protected double normalizeAngle() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double headingAngle = angles.thirdAngle;
         telemetry.update();
         return headingAngle;
     }
 
-    private boolean shortestDirection(double angle)
-    {
+    protected boolean shortestDirection(double angle) {
         return normalizeAngle() < angle;
     }
 
@@ -719,10 +743,13 @@ abstract class MyOpMode extends LinearOpMode {
         }
     }
 
-    private void forwardDrive(double inches) {
-        int targetPosition = (int) (inches * 45);
+    protected void forwardDrive(double inches) {
+        resetAngle();
+        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        int targetPosition = (int) (inches * 22.5);
         int currentPosition = leftRear.getCurrentPosition();
-        if (inches > 0) {
+        if (inches < 0) {
             rightRear.setDirection(DcMotor.Direction.FORWARD);
             rightFront.setDirection(DcMotor.Direction.FORWARD);
             leftRear.setDirection(DcMotor.Direction.REVERSE);
@@ -733,9 +760,8 @@ abstract class MyOpMode extends LinearOpMode {
             leftRear.setDirection(DcMotor.Direction.FORWARD);
             leftFront.setDirection(DcMotor.Direction.FORWARD);
         }
-        PIDController pidDrive = new PIDController(.02, .001, 0);
 
-
+        PIDController pidDrive = new PIDController(driveP, driveI, driveD);
         // Set up parameters for driving in a straight line.
         pidDrive.setSetpoint(0);
         double power = 0.3;
@@ -743,10 +769,11 @@ abstract class MyOpMode extends LinearOpMode {
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
 
+
         while (opModeIsActive() && (inches < 0 ? (leftRear.getCurrentPosition() < currentPosition - targetPosition) : (leftRear.getCurrentPosition() < -currentPosition + targetPosition))) {
             // Use PID with imu input to drive in a straight line.
 
-            double correction = pidDrive.performPID(inches < 0 ? getAngle() : -getAngle());
+            double correction = pidDrive.performPID(inches < 0 ? -getAngle() : getAngle());
 
             telemetry.addData("1 imu heading", lastAngles.firstAngle);
             telemetry.addData("2 global heading", globalAngle);
@@ -778,7 +805,10 @@ abstract class MyOpMode extends LinearOpMode {
     }
 
     @SuppressWarnings("unused")
-    private void pidSideDrive(double inches) {
+    protected void pidSideDrive(double inches) {
+        resetAngle();
+        leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int targetPosition = (int) (inches * 45);
         int currentPosition = leftRear.getCurrentPosition();
         if (inches > 0) {
@@ -792,7 +822,7 @@ abstract class MyOpMode extends LinearOpMode {
             leftRear.setDirection(DcMotor.Direction.REVERSE);
             leftFront.setDirection(DcMotor.Direction.FORWARD);
         }
-        PIDController pidDrive = new PIDController(.1, .002, 0);
+        PIDController pidDrive = new PIDController(sidedriveP, sidedriveI, sidedriveD);
 
 
         // Set up parameters for driving in a straight line.
@@ -802,7 +832,14 @@ abstract class MyOpMode extends LinearOpMode {
         pidDrive.setInputRange(-90, 90);
         pidDrive.enable();
 
+        telemetry.addData("left rear position", leftRear.getCurrentPosition());
+        telemetry.addData("current position", currentPosition);
+        telemetry.addData("target position", targetPosition);
+        telemetry.update();
+
         while (opModeIsActive() && (inches > 0 ? (leftRear.getCurrentPosition() < currentPosition + targetPosition) : (leftRear.getCurrentPosition() < -currentPosition + targetPosition))) {
+            telemetry.addData("while loop", true);
+            telemetry.update();
             // Use PID with imu input to drive in a straight line.
 
             double correction = pidDrive.performPID(inches < 0 ? getAngle() : -getAngle());

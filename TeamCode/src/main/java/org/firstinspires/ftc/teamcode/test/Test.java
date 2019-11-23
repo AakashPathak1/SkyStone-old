@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.teamcode.MyOpMode;
 
 import java.util.Locale;
 
@@ -14,7 +15,7 @@ public class Test extends MyOpMode {
 
     @Override
     public void runOpMode() {
-        initialize();
+        initialize(false);
         findSkystoneTest();
     }
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -8,8 +8,8 @@ public abstract class TestChassisOpMode extends LinearOpMode {
 
     private final boolean calibrateIMU = false;
 
-    DcMotor leftRear, rightRear, leftFront, rightFront;
-    BNO055IMU imu;
+    protected DcMotor leftRear, rightRear, leftFront, rightFront;
+    protected BNO055IMU imu;
 
     protected void initialize() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();

@@ -11,7 +11,7 @@ public class MechanumDrive extends MyOpMode {
 
     @Override
     public void runOpMode() {
-        initialize();
+        initialize(false);
         // Send telemetry message to signify robot waiting;
         boolean accelerating = false;
         composeTelemetry();
@@ -153,12 +153,7 @@ public class MechanumDrive extends MyOpMode {
 
 
             if (gamepad2.y) {
-                lifterLeft.setPower(-0.8);
-                lifterRight.setPower(-0.8);
-                while (downStop.getState() && opModeIsActive()) { //is not pressed
-                }
-                lifterLeft.setPower(0);
-                lifterRight.setPower(0);
+                dropLifter();
             }
 
             telemetry.addData("lifter power: ", lifterPower);
